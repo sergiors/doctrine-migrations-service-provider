@@ -1,5 +1,5 @@
-Doctrine Migrations for Silex
------------------------------
+Doctrine Migrations Service Provider
+------------------------------------
 [![Build Status](https://travis-ci.org/sergiors/doctrine-migrations-service-provider.svg?branch=master)](https://travis-ci.org/sergiors/doctrine-migrations-service-provider)
 
 Install
