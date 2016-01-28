@@ -1,4 +1,5 @@
 <?php
+
 namespace Sergiors\Silex\Provider;
 
 use Silex\Application;
@@ -66,10 +67,10 @@ class DoctrineMigrationsServiceProvider implements ServiceProviderInterface
         }));
 
         $app['migrations.options'] = [
-            'name' =>  null,
+            'name' => null,
             'namespace' => 'DoctrineMigrations',
             'table_name' => 'doctrine_migration_versions',
-            'directory' => null
+            'directory' => null,
         ];
     }
 
