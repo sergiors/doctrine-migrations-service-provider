@@ -2,8 +2,8 @@
 
 namespace Sergiors\Silex\Provider;
 
-use Silex\Application;
-use Silex\ServiceProviderInterface;
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
 use Doctrine\DBAL\Migrations\Tools\Console\Command\DiffCommand;
 use Doctrine\DBAL\Migrations\Tools\Console\Command\ExecuteCommand;
 use Doctrine\DBAL\Migrations\Tools\Console\Command\GenerateCommand;
@@ -18,7 +18,7 @@ use Doctrine\DBAL\Migrations\Configuration\Configuration;
  */
 class DoctrineMigrationsServiceProvider implements ServiceProviderInterface
 {
-    public function register(Application $app)
+    public function register(Container $app)
     {
         if (!isset($app['db'])) {
             throw new \LogicException(
@@ -32,7 +32,7 @@ class DoctrineMigrationsServiceProvider implements ServiceProviderInterface
             );
         }
 
-        $app['migrations.configuration'] = $app->share(function (Application $app) {
+        $app['migrations.configuration'] = function () use ($app) {
             $options = $app['migrations.options'];
 
             $config = new Configuration($app['db']);
@@ -43,9 +43,9 @@ class DoctrineMigrationsServiceProvider implements ServiceProviderInterface
             $config->registerMigrationsFromDirectory($options['directory']);
 
             return $config;
-        });
+        };
 
-        $app['console'] = $app->share($app->extend('console', function ($console) use ($app) {
+        $app['console'] = $app->extend('console', function ($console) use ($app) {
             $console->getHelperSet()->set(new QuestionHelper());
 
             $console->add(new ExecuteCommand());
@@ -64,7 +64,7 @@ class DoctrineMigrationsServiceProvider implements ServiceProviderInterface
             }
 
             return $console;
-        }));
+        });
 
         $app['migrations.options'] = [
             'name' => null,
@@ -72,9 +72,5 @@ class DoctrineMigrationsServiceProvider implements ServiceProviderInterface
             'table_name' => 'doctrine_migration_versions',
             'directory' => null,
         ];
-    }
-
-    public function boot(Application $app)
-    {
     }
 }
