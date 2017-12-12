@@ -1,6 +1,6 @@
 {
     "name": "sergiors/doctrine-migrations-service-provider",
-    "description": "Doctrine Migrations for Silex",
+    "description": "Doctrine Migrations for Pimple",
     "license": "MIT",
     "authors": [
         {
