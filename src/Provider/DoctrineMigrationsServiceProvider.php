@@ -1,6 +1,6 @@
 <?php
 
-namespace Sergiors\Silex\Provider;
+namespace Sergiors\Pimple\Provider;
 
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
@@ -18,24 +18,31 @@ use Doctrine\DBAL\Migrations\Configuration\Configuration;
  */
 class DoctrineMigrationsServiceProvider implements ServiceProviderInterface
 {
-    public function register(Container $app)
+    public function register(Container $container)
     {
-        if (!isset($app['db'])) {
+        if (!isset($container['db'])) {
             throw new \LogicException(
                 'You must register the DoctrineServiceProvider to use the DoctrineMigrationsServiceProvider.'
             );
         }
 
-        if (!isset($app['console'])) {
+        if (!isset($container['console'])) {
             throw new \LogicException(
                 'You must register the ConsoleServiceProvider to use the DoctrineMigrationsServiceProvider.'
             );
         }
 
-        $app['migrations.configuration'] = function () use ($app) {
-            $options = $app['migrations.options'];
+        $container['migrations.options'] = [
+            'name'       => null,
+            'namespace'  => 'DoctrineMigrations',
+            'table_name' => 'doctrine_migration_versions',
+            'directory'  => null,
+        ];
 
-            $config = new Configuration($app['db']);
+        $container['migrations.configuration'] = function () use ($container) {
+            $options = $container['migrations.options'];
+
+            $config = new Configuration($container['db']);
             $config->setName($options['name']);
             $config->setMigrationsTableName($options['table_name']);
             $config->setMigrationsDirectory($options['directory']);
@@ -45,7 +52,7 @@ class DoctrineMigrationsServiceProvider implements ServiceProviderInterface
             return $config;
         };
 
-        $app['console'] = $app->extend('console', function ($console) use ($app) {
+        $container['console'] = $container->extend('console', function ($console) use ($container) {
             $console->getHelperSet()->set(new QuestionHelper());
 
             $console->add(new ExecuteCommand());
@@ -60,17 +67,12 @@ class DoctrineMigrationsServiceProvider implements ServiceProviderInterface
 
             $commands = $console->all('migrations');
             foreach ($commands as $command) {
-                $command->setMigrationConfiguration($app['migrations.configuration']);
+                $command->setMigrationConfiguration(
+                    $container['migrations.configuration']
+                );
             }
 
             return $console;
         });
-
-        $app['migrations.options'] = [
-            'name' => null,
-            'namespace' => 'DoctrineMigrations',
-            'table_name' => 'doctrine_migration_versions',
-            'directory' => null,
-        ];
     }
 }

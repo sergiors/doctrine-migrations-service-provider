@@ -5,17 +5,22 @@ Doctrine Migrations Service Provider
 Install
 -------
 ```bash
-composer require sergiors/doctrine-migrations-service-provider "dev-master"
+composer require sergiors/doctrine-migrations-service-provider
 ```
 
 ```php
 use Silex\Provider\DoctrineServiceProvider;
-use Sergiors\Silex\Provider\ConsoleServiceProvider;
-use Sergiors\Silex\Provider\DoctrineMigrationsServiceProvider;
+use Sergiors\Pimple\Provider\DoctrineMigrationsServiceProvider;
 
-$app->register(new ConsoleServiceProvider());
-$app->register(new DoctrineServiceProvider());
-$app->register(new DoctrineMigrationsServiceProvider());
+$container = new \Pimple\Container();
+
+$container['console'] = function () {
+    return new \Symfony\Component\Console\Application();
+};
+$container->register(new DoctrineServiceProvider());
+$container->register(new DoctrineMigrationsServiceProvider());
+
+$container['console']->run();
 ```
 
 License
